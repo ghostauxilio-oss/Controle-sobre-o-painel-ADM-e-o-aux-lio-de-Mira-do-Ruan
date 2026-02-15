@@ -1,0 +1,1 @@
+# Controle-sobre-o-painel-ADM-e-o-aux-lio-de-Mira-do-Ruan
