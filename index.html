@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASTER MONITOR - CONTROLE TOTAL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --master-red: #ff0055; --bg: #030305; --card-bg: #0d0d12; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: #fff; padding: 20px; }
+
+        .master-container { max-width: 1100px; margin: auto; }
+        .header-master { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 30px; border-bottom: 3px solid var(--master-red); 
+            padding-bottom: 15px; background: rgba(255,0,85,0.05); padding: 20px; border-radius: 10px 10px 0 0;
+        }
+        .header-master h1 { color: var(--master-red); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .monitor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .monitor-card { background: var(--card-bg); border: 1px solid #222; padding: 20px; border-radius: 20px; position: relative; }
+        .monitor-card h3 { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 10px; }
+        .monitor-card p { font-size: 24px; font-weight: bold; }
+        .vencendo-alert { border: 1px solid #ffeb3b !important; }
+        
+        .ghost-card { border: 1px solid #00ff00 !important; background: rgba(0,255,0,0.02); }
+        #ghost-typing { font-family: monospace; font-size: 14px; color: #00ff00; }
+
+        .ban-control { background: #1a0000; border: 1px solid #ff0000; padding: 20px; border-radius: 15px; margin-bottom: 30px; }
+        .ban-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-ban-adm { background: #ff0000; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        .btn-unban { background: #00ff00; color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; }
+        .btn-freeze { background: #007bff; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; }
+        .btn-kick-all { background: #ff8c00; color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; }
+
+        .adm-info-row { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #330000; font-size: 12px; }
+
+        .search-box { width: 100%; padding: 15px; background: #111; border: 1px solid #222; border-radius: 10px; color: #fff; margin-bottom: 15px; outline: none; }
+
+        .table-wrapper { width: 100%; overflow-x: auto; background: var(--card-bg); border-radius: 15px; border: 1px solid #222; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+        th { background: rgba(255,0,85,0.1); padding: 18px; color: var(--master-red); font-size: 13px; }
+        td { padding: 18px; border-bottom: 1px solid #1a1a1a; font-size: 14px; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .online { background: #00ff0022; color: #00ff00; border: 1px solid #00ff00; }
+        .offline { background: #ff000022; color: #ff0000; border: 1px solid #ff0000; }
+        .shadow-ban { background: #555 !important; color: #eee !important; border: 1px solid #333 !important; }
+
+        .device-info { font-size: 10px; color: #00d9ff; font-family: monospace; }
+        .badge-eterna { background: #ff00ff; color: #fff; padding: 2px 5px; border-radius: 4px; font-size: 10px; margin-left: 5px; }
+        .btn-reset { background: #440000; color: #ff4444; border: 1px solid #ff4444; padding: 10px; border-radius: 8px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold; font-size: 12px;}
+
+        #live-status { font-size: 12px; color: #00ff00; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .clonado { color: #ff0000; animation: flash 0.8s infinite; font-weight: bold; }
+
+        /* NOVO: BOTÃO FLUTUANTE GERAR KEY */
+        .fab-master {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--master-red); width: 50px; height: 50px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4); cursor: pointer; z-index: 1000;
+            transition: transform 0.3s;
+        }
+        .fab-master:hover { transform: scale(1.1); }
+        .badge-master-only { background: #00d9ff; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; margin-left: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="master-container">
+    <div class="header-master">
+        <h1><i class="fas fa-user-crown"></i> MASTER CONTROL</h1>
+        <div>
+            <span id="live-status">● MONITORANDO SISTEMA</span>
+            <div id="clock" style="color: #555; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <div id="safety-alert" style="display:none; background: #ffeb3b; color: #000; padding: 10px; text-align: center; font-weight: bold; margin-bottom: 10px; border-radius: 10px;">
+        ⚠️ O SISTEMA ESTAVA BLOQUEADO POR INATIVIDADE (MAIS DE 4 DIAS). ACESSO MASTER RESTAURADO.
+    </div>
+
+    <div class="ban-control">
+        <div class="ban-header">
+            <div>
+                <h3 style="color: #ff0000;"><i class="fas fa-shield-alt"></i> CONTROLE DE SEGURANÇA ADM</h3>
+                <p id="adm-status-display" style="color: #00ff00; font-size: 13px;">STATUS: ATIVO</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn-kick-all" onclick="kickAllUsers()"><i class="fas fa-bolt"></i> DERRUBAR TODOS</button>
+                <button class="btn-unban" onclick="setAdmStatus('ativo')">ATIVAR</button>
+                <button class="btn-freeze" onclick="setAdmStatus('congelado')">CONGELAR</button>
+                <button class="btn-ban-adm" onclick="setAdmStatus('banido')">BANIR ADM</button>
+            </div>
+        </div>
+        <div class="adm-info-row">
+            <span><i class="fas fa-map-marker-alt"></i> LOCAL: <a id="adm-map-link" href="#" target="_blank" style="color:cyan; text-decoration:none;">CARREGANDO MAPA...</a></span>
+            <span><i class="fas fa-network-wired"></i> IP: <b id="adm-ip" style="color:var(--master-red)">---</b></span>
+            <span><i class="fas fa-clock"></i> ACESSO: <b id="adm-last-seen">---</b></span>
+        </div>
+    </div>
+
+    <div class="monitor-grid">
+        <div class="monitor-card ghost-card"><h3><i class="fas fa-eye"></i> O ADM ESTÁ DIGITANDO:</h3><p id="ghost-typing">...</p></div>
+        <div class="monitor-card"><h3>Keys Criadas</h3><p id="m-total-keys">0</p></div>
+        <div class="monitor-card"><h3>Online Agora</h3><p id="m-active">0</p></div>
+        <div class="monitor-card vencendo-alert"><h3>Vencendo (24h)</h3><p id="m-vencendo" style="color:#ffeb3b">0</p></div>
+    </div>
+
+    <input type="text" id="masterSearch" class="search-box" placeholder="🔍 Buscar cliente, senha ou dispositivo..." onkeyup="filterTable()">
+
+    <div class="table-wrapper">
+        <h2 style="padding: 20px; font-size: 16px; border-bottom: 1px solid #222;">LISTA DE CLIENTES DO ADM</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>CLIENTE / DISPOSITIVO</th>
+                    <th>SENHA/KEY</th>
+                    <th>VALIDADE</th>
+                    <th>USO/DISP.</th>
+                    <th>STATUS</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+            <tbody id="master-list"></tbody>
+        </table>
+        <div style="padding: 15px;">
+            <button class="btn-reset" onclick="resetDatabase()"><i class="fas fa-trash-alt"></i> LIMPEZA GERAL (APAGAR TODAS AS KEYS)</button>
+        </div>
+    </div>
+</div>
+
+<div class="fab-master" onclick="generateMasterKey()" title="Gerar Key Secreta">
+    <i class="fas fa-plus"></i>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    const firebaseConfig = { databaseURL: "https://ruanzzk-default-rtdb.firebaseio.com/" };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const database = firebase.database();
+
+    // --- CADEADO DE RESGATE ---
+    function runSecurityCheck() {
+        const agora = new Date().getTime();
+        database.ref('config/master_last_checkin').once('value', (snapshot) => {
+            const lastCheckin = snapshot.val() || agora;
+            const noventaESeisHoras = 96 * 60 * 60 * 1000;
+            if (agora - lastCheckin > noventaESeisHoras) {
+                database.ref('config').update({ adm_status: 'congelado', system_lock: true });
+                document.getElementById('safety-alert').style.display = 'block';
+            } else {
+                database.ref('config/system_lock').set(false);
+            }
+            database.ref('config/master_last_checkin').set(agora);
+        });
+    }
+    runSecurityCheck();
+
+    // --- NOVO: GERADOR DE KEY INVISÍVEL ---
+    function generateMasterKey() {
+        const nome = prompt("Nome do seu amigo:");
+        if(!nome) return;
+        
+        const randomPass = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const agora = new Date().getTime();
+        const dezAnos = agora + (10 * 365 * 24 * 60 * 60 * 1000);
+
+        const newKey = {
+            client: nome,
+            key: randomPass,
+            limit: 1,
+            used: 0,
+            expirationTime: dezAnos,
+            durationLabel: "ETERNA",
+            expirationDateLabel: "Válido por 10 anos",
+            masterKey: true, // TAG SECRETA: ISSO ESCONDE A KEY DO ADM
+            masterStatus: "ativo",
+            isOnline: false
+        };
+
+        database.ref('keys').push(newKey).then(() => {
+            alert(`KEY GERADA COM SUCESSO!\nCliente: ${nome}\nSenha: ${randomPass}\n\nNota: Essa key está invisível para o ADM.`);
+        });
+    }
+
+    function setAdmStatus(status) {
+        if(confirm(`Mudar status do ADM para ${status.toUpperCase()}?`)) database.ref('config/adm_status').set(status);
+    }
+
+    function kickAllUsers() {
+        if(confirm("Deseja desconectar TODOS os clientes agora?")) {
+            database.ref('keys').once('value', (snapshot) => {
+                snapshot.forEach((child) => {
+                    database.ref('keys/' + child.key).update({ isOnline: false, used: 0 });
+                });
+            });
+        }
+    }
+
+    function toggleShadowBan(id, currentStatus) {
+        const newStatus = currentStatus === 'shadow' ? 'ativo' : 'shadow';
+        if(confirm(newStatus === 'shadow' ? "Ativar Shadow Ban?" : "Remover Shadow Ban?")) {
+            database.ref('keys/' + id).update({ masterStatus: newStatus });
+        }
+    }
+
+    function resetDatabase() {
+        if(prompt("DIGITE 'DELETAR' PARA APAGAR TUDO:") === "DELETAR") database.ref('keys').remove();
+    }
+
+    function filterTable() {
+        const input = document.getElementById("masterSearch").value.toUpperCase();
+        const rows = document.getElementById("master-list").getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+            const text = rows[i].textContent || rows[i].innerText;
+            rows[i].style.display = text.toUpperCase().indexOf(input) > -1 ? "" : "none";
+        }
+    }
+
+    database.ref('keys').on('value', (snapshot) => {
+        const tbody = document.getElementById('master-list');
+        tbody.innerHTML = "";
+        let totalKeys = 0, onlineCount = 0, vencendoCount = 0;
+        const agora = new Date().getTime();
+
+        snapshot.forEach((child) => {
+            const item = child.val();
+            const id = child.key;
+            totalKeys++;
+            if(item.isOnline) onlineCount++;
+            if(item.expirationTime && (item.expirationTime - agora) < 86400000 && (item.expirationTime - agora) > 0) vencendoCount++;
+
+            const isEterna = (item.expirationTime - agora) > (5 * 365 * 24 * 60 * 60 * 1000);
+            const isClonado = item.used > item.limit;
+            const statusMaster = item.masterStatus || 'ativo';
+            const isMasterKey = item.masterKey === true; // Identifica se é sua
+
+            tbody.innerHTML += `
+                <tr style="${isMasterKey ? 'background: rgba(0, 217, 255, 0.05);' : ''}">
+                    <td class="${isClonado ? 'clonado' : ''}">
+                        ${item.client || 'Sem Nome'} 
+                        ${isMasterKey ? '<span class="badge-master-only">SUA KEY</span>' : ''}
+                        ${isEterna ? '<span class="badge-eterna">ETERNA</span>' : ''}<br>
+                        <span class="device-info"><i class="fas fa-mobile-alt"></i> ${item.deviceName || 'Não Identificado'}</span>
+                    </td>
+                    <td style="color:#ffeb3b">${item.key}</td>
+                    <td>${item.durationLabel}<br><small style="color:#666">${item.expirationDateLabel}</small></td>
+                    <td><b>${item.used || 0}</b> / ${item.limit}</td>
+                    <td>
+                        <span class="status-badge ${statusMaster === 'shadow' ? 'shadow-ban' : (item.isOnline ? 'online' : 'offline')}">
+                            ${statusMaster === 'shadow' ? 'SHADOW BAN' : (item.isOnline ? 'ONLINE' : 'OFFLINE')}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="toggleShadowBan('${id}', '${statusMaster}')" style="background:none; border:1px solid #555; color:#aaa; cursor:pointer; padding:3px 8px; border-radius:4px; margin-right:5px;">Shadow</button>
+                        <button onclick="kickKey('${id}')" style="background:none; border:1px solid red; color:red; cursor:pointer; padding:3px 8px; border-radius:4px;">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('m-total-keys').innerText = totalKeys;
+        document.getElementById('m-active').innerText = onlineCount;
+        document.getElementById('m-vencendo').innerText = vencendoCount;
+        filterTable();
+    });
+
+    database.ref('config').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const status = data.adm_status || 'ativo';
+        document.getElementById('adm-status-display').innerText = `STATUS: ${status.toUpperCase()}`;
+        document.getElementById('adm-status-display').style.color = status === 'banido' ? 'red' : (status === 'congelado' ? '#007bff' : '#00ff00');
+        
+        const ip = data.adm_ip || '---';
+        document.getElementById('adm-ip').innerText = ip;
+        document.getElementById('adm-last-seen').innerText = data.adm_last_login || '---';
+        document.getElementById('adm-map-link').href = `https://www.google.com/maps?q=${ip}`;
+        document.getElementById('adm-map-link').innerText = `VER LOCALIZAÇÃO`;
+
+        document.getElementById('ghost-typing').innerText = data.typing_now || 'Silêncio...';
+    });
+
+    function kickKey(id) {
+        if(confirm("Remover esta key?")) database.ref('keys/' + id).remove();
+    }
+
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
+</script>
+
+</body>
+</html>
